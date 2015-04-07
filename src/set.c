@@ -56,7 +56,7 @@ int set_union(Set *setu, const Set *set1, const Set *set2)
 
         member = list_head(set1);
         while (member) {
-                if (set_insert(setu, list_data(member)) != 0) {
+                if (list_ins_next(setu, list_tail(setu), list_data(member)) != 0) {
                         set_destroy(setu);
                         return -1;
                 }
@@ -67,7 +67,7 @@ int set_union(Set *setu, const Set *set1, const Set *set2)
         member = list_head(set2);
         while (member) {
                 if (!set_is_member(setu, list_data(member))) {
-                        if (set_insert(setu, list_data(member)) != 0) {
+                        if (list_ins_next(setu, list_tail(setu), list_data(member)) != 0) {
                                 set_destroy(setu);
                                 return -1;
                         }
@@ -90,7 +90,7 @@ int set_intersection(Set *seti, const Set *set1, const Set *set2)
         member = list_head(set1);
         while (member) {
                 if (set_is_member(set2, list_data(member))) {
-                        if (set_insert(seti, list_data(member)) != 0) {
+                        if (list_ins_next(seti, list_tail(seti), list_data(member)) != 0) {
                                 set_destroy(seti);
                                 return -1;
                         }
@@ -113,7 +113,7 @@ int set_difference(Set *setd, const Set *set1, const Set *set2)
         member = list_head(set1);
         while (member) {
                 if (!set_is_member(set2, list_data(member))) {
-                        if (set_insert(setd, list_data(member)) != 0) {
+                        if (list_ins_next(setd, list_tail(setd), list_data(member)) != 0) {
                                 set_destroy(setd);
                                 return -1;
                         }
