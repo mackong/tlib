@@ -1,0 +1,6 @@
+src/*.o
+src/libtlib.so
+src/deps
+src/tests/*.o
+src/tests/deps
+src/tests/test

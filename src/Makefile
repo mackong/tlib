@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -fPIC
 LDFLAGS=-L. -ltlib -lcheck
 
 SRC=$(wildcard *.c)
@@ -15,7 +15,6 @@ $(TARGET_SO): $(OBJ)
 
 $(DEPS): $(SRC)
 	-rm -f $(DEPS)
-	@echo $^
 	$(CC) $(CFLAGS) -MM $^ > $(DEPS)
 
 -include $(DEPS)
