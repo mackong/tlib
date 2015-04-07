@@ -435,6 +435,8 @@ START_TEST (test_stack_pop)
         stack = (Stack *)malloc(sizeof(Stack));
         ck_assert_ptr_ne(stack, NULL);
 
+        stack_init(stack, NULL);
+        
         stack_push(stack, (const void *)1);
         stack_push(stack, (const void *)2);
         stack_push(stack, (const void *)3);
