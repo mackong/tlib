@@ -5,7 +5,7 @@ This is inspired by [Mastering Algorithms with C](http://www.amazon.com/Masterin
 ## Dependencies
 The library itself is written in ANSI c *without* any other library dependencies.
 
-But if you want to run the unit test, you should have [Check](http://check.sourceforge.net/) library with version >= 0.9.14 installed.
+But if you want to run the unit test, you should have [Check](http://check.sourceforge.net/) library with version >= 0.9.10 installed.
 
 ## How to use it
 Type
