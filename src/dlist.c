@@ -3,7 +3,7 @@
 
 #include "dlist.h"
 
-int dlist_init(DList *list, void (*destroy) (void *data))
+int dlist_init(DList *list, fp_destroy destroy)
 {
         list->size = 0;
         list->head = NULL;

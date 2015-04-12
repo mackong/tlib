@@ -1,6 +1,8 @@
 #ifndef DLIST_H
 #define DLIST_H
 
+#include "common.h"
+
 typedef struct DListElem_ {
         void *data;
         struct DListElem_ *prev;
@@ -9,13 +11,13 @@ typedef struct DListElem_ {
 
 typedef struct DList {
         int size;
-        int (*match) (const void *key1, const void *key2);
-        void (*destroy) (void *data);
+        fp_match match;
+        fp_destroy destroy;
         DListElem *head;
         DListElem *tail;
 } DList;
 
-int dlist_init(DList *list, void (*destroy) (void *data));
+int dlist_init(DList *list, fp_destroy destroy);
 int dlist_destroy(DList *list);
 int dlist_ins_next(DList *list, DListElem *element, const void *data);
 int dlist_ins_prev(DList *list, DListElem *element, const void *data);

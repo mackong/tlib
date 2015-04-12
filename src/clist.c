@@ -3,7 +3,7 @@
 
 #include "clist.h"
 
-int clist_init(CList *list, void (*destroy) (void *data))
+int clist_init(CList *list, fp_destroy destroy)
 {
         list->size = 0;
         list->head = NULL;

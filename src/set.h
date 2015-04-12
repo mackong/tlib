@@ -5,8 +5,7 @@
 
 typedef List Set;
 
-int set_init(Set *set, int (*match)(const void *key1, const void *key2),
-              void (*destroy)(void *data));
+int set_init(Set *set, fp_match match, fp_destroy destroy);
 #define set_destroy list_destroy
 int set_insert(Set *set, const void *data);
 int set_remove(Set *set, void **data);

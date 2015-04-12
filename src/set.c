@@ -2,8 +2,7 @@
 
 #include "set.h"
 
-int set_init(Set *set, int (*match)(const void *key1, const void *key2),
-             void (*destroy)(void *data))
+int set_init(Set *set, fp_match match, fp_destroy destroy)
 {
         int ret = 0;
         
