@@ -3,13 +3,12 @@
 
 #include <check.h>
 
-#include "../list.h"
-#include "../dlist.h"
-#include "../clist.h"
-#include "../stack.h"
-#include "../queue.h"
-#include "../set.h"
+#include "../tlib.h"
 
+static void dump(const void *data)
+{
+        printf("%d ", data);
+}
 
 START_TEST (test_list_init)
 {
@@ -1129,6 +1128,288 @@ START_TEST (test_set_cover)
 }
 END_TEST
 
+static int tree_compare(const void *data1, const void *data2)
+{
+        if (data1 < data2) {
+                return -1;
+        } else if (data1 > data2) {
+                return 1;
+        } else {
+                return 0;
+        }
+}
+
+START_TEST (test_bistree_init)
+{
+        BisTree *tree;
+        int ret;
+
+        tree = (BisTree *)malloc(sizeof(BisTree));
+        ck_assert_ptr_ne(tree, NULL);
+
+        ret = bistree_init(tree, tree_compare, NULL);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 0);
+
+        bistree_destroy(tree);
+        free(tree);
+}
+END_TEST
+
+START_TEST (test_bistree_destroy)
+{
+        BisTree *tree;
+        int ret;
+
+        tree = (BisTree *)malloc(sizeof(BisTree));
+        ck_assert_ptr_ne(tree, NULL);
+
+        bistree_init(tree, tree_compare, NULL);
+
+        ret = bistree_destroy(tree);
+        ck_assert_int_eq(ret, 0);
+
+        free(tree);
+}
+END_TEST
+
+START_TEST (test_bistree_insert)
+{
+        BisTree *tree;
+        int ret;
+
+        tree = (BisTree *)malloc(sizeof(BisTree));
+        ck_assert_ptr_ne(tree, NULL);
+
+        bistree_init(tree, tree_compare, NULL);
+
+        ret = bistree_insert(tree, (const void *)27);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 1);
+
+        ret = bistree_insert(tree, (const void *)45);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 2);
+
+        ret = bistree_insert(tree, (const void *)34);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 3);
+
+        ret = bistree_insert(tree, (const void *)20);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 4);
+
+        ret = bistree_insert(tree, (const void *)11);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 5);
+
+        ret = bistree_insert(tree, (const void *)59);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 6);
+
+        ret = bistree_insert(tree, (const void *)10);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 7);
+        
+        ret = bistree_insert(tree, (const void *)25);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 8);
+
+        ret = bistree_insert(tree, (const void *)29);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 9);
+
+        ret = bistree_insert(tree, (const void *)30);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        bistree_preorder_dump(tree, dump);
+        printf("\n");
+        bistree_inorder_dump(tree, dump);
+        printf("\n");
+        bistree_postorder_dump(tree, dump);
+        printf("\n");
+        
+        ret = bistree_destroy(tree);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 0);
+
+        free(tree);
+}
+END_TEST
+
+START_TEST (test_bistree_remove)
+{
+        BisTree *tree;
+        int ret;
+
+        tree = (BisTree *)malloc(sizeof(BisTree));
+        ck_assert_ptr_ne(tree, NULL);
+
+        bistree_init(tree, tree_compare, NULL);
+
+        ret = bistree_insert(tree, (const void *)27);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 1);
+
+        ret = bistree_insert(tree, (const void *)45);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 2);
+
+        ret = bistree_insert(tree, (const void *)34);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 3);
+
+        ret = bistree_insert(tree, (const void *)20);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 4);
+
+        ret = bistree_insert(tree, (const void *)11);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 5);
+
+        ret = bistree_insert(tree, (const void *)59);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 6);
+
+        ret = bistree_insert(tree, (const void *)10);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 7);
+        
+        ret = bistree_insert(tree, (const void *)25);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 8);
+
+        ret = bistree_insert(tree, (const void *)29);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 9);
+
+        ret = bistree_insert(tree, (const void *)30);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        ret = bistree_remove(tree, (const void *)27);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        ret = bistree_remove(tree, (const void *)34);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        bistree_preorder_dump(tree, dump);
+        printf("\n");
+        bistree_inorder_dump(tree, dump);
+        printf("\n");
+        bistree_postorder_dump(tree, dump);
+        printf("\n");
+        
+        ret = bistree_destroy(tree);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 0);
+
+        free(tree);
+}
+END_TEST
+
+START_TEST (test_bistree_lookup)
+{
+        BisTree *tree;
+        int ret;
+        void *data;
+
+        tree = (BisTree *)malloc(sizeof(BisTree));
+        ck_assert_ptr_ne(tree, NULL);
+
+        bistree_init(tree, tree_compare, NULL);
+
+        ret = bistree_insert(tree, (const void *)27);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 1);
+
+        ret = bistree_insert(tree, (const void *)45);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 2);
+
+        ret = bistree_insert(tree, (const void *)34);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 3);
+
+        ret = bistree_insert(tree, (const void *)20);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 4);
+
+        ret = bistree_insert(tree, (const void *)11);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 5);
+
+        ret = bistree_insert(tree, (const void *)59);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 6);
+
+        ret = bistree_insert(tree, (const void *)10);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 7);
+        
+        ret = bistree_insert(tree, (const void *)25);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 8);
+
+        ret = bistree_insert(tree, (const void *)29);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 9);
+
+        ret = bistree_insert(tree, (const void *)30);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        data = (void *)5;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, -1);
+
+        data = (void *)100;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, -1);
+        
+        data = (void *)27;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, 0);
+
+        data = (void *)10;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, 0);
+
+        data = (void *)34;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, 0);
+        
+        ret = bistree_remove(tree, (const void *)27);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        ret = bistree_remove(tree, (const void *)34);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 10);
+
+        data = (void *)27;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, -1);
+
+        data = (void *)10;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, 0);
+
+        data = (void *)34;
+        ret = bistree_lookup(tree, &data);
+        ck_assert_int_eq(ret, -1);
+        
+        ret = bistree_destroy(tree);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 0);
+
+        free(tree);
+}
+END_TEST
+
 Suite *list_suite(void)
 {
         Suite *s;
@@ -1251,6 +1532,26 @@ Suite *set_suite(void)
         return s;
 }
 
+Suite *bistree_suite(void)
+{
+        Suite *s;
+        TCase *tc_core;
+
+        s = suite_create("BisTree_Suite");
+
+        tc_core = tcase_create("Core");
+
+        tcase_add_test(tc_core, test_bistree_init);
+        tcase_add_test(tc_core, test_bistree_destroy);
+        tcase_add_test(tc_core, test_bistree_insert);
+        tcase_add_test(tc_core, test_bistree_remove);
+        tcase_add_test(tc_core, test_bistree_lookup);
+        
+        suite_add_tcase(s, tc_core);
+
+        return s;
+}
+
 int main(int argc, char *argv[])
 {
         SRunner *sr;
@@ -1263,6 +1564,7 @@ int main(int argc, char *argv[])
         srunner_add_suite(sr, stack_suite());
         srunner_add_suite(sr, queue_suite());
         srunner_add_suite(sr, set_suite());
+        srunner_add_suite(sr, bistree_suite());
         
         srunner_run_all(sr, CK_VERBOSE);
 
