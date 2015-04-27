@@ -12,5 +12,9 @@
 #include "ohtbl.h"
 #include "bitree.h"
 #include "bistree.h"
+#include "heap.h"
+#include "pqueue.h"
+
+#include "sort.h"
 
 #endif /* TLIB_*/

@@ -10,10 +10,41 @@ static void dump(const void *data)
         printf("%d ", data);
 }
 
-START_TEST (test_list_init)
+static int match(const void *key1, const void *key2)
+{
+        return key1 == key2;
+}
+
+static int compare(const void *data1, const void *data2)
+{
+        if (data1 < data2) {
+                return -1;
+        } else if (data1 > data2) {
+                return 1;
+        } else {
+                return 0;
+        }
+}
+
+static int sort_compare(const void *key1, const void *key2)
+{
+        int tmp1 = *(int *)key1;
+        int tmp2 = *(int *)key2;
+
+        if (tmp1 < tmp2) {
+                return -1;
+        } else if (tmp1 > tmp2) {
+                return 1;
+        } else {
+                return 0;
+        }
+}
+
+START_TEST (test_list)
 {
         List *list = NULL;
-        int ret = 0;
+        int ret;
+        void *data;
 
         list = (List *)malloc(sizeof(List));
         ck_assert_ptr_ne(list, NULL);
@@ -23,37 +54,6 @@ START_TEST (test_list_init)
         ck_assert_int_eq(list_size(list), 0);
         ck_assert_ptr_eq(list_head(list), NULL);
         ck_assert_ptr_eq(list_tail(list), NULL);
-
-        list_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_list_destroy)
-{
-        List *list = NULL;
-        int ret = 0;
-
-        list = (List *)malloc(sizeof(List));
-        ck_assert_ptr_ne(list, NULL);
-
-        list_init(list, NULL);
-
-        ret = list_destroy(list);
-        ck_assert_int_eq(ret, 0);
-
-        free(list);
-}
-END_TEST
-
-START_TEST (test_list_ins_next)
-{
-        List *list = NULL;
-
-        list = (List *)malloc(sizeof(List));
-        ck_assert_ptr_ne(list, NULL);
-
-        list_init(list, NULL);
 
         list_ins_next(list, NULL, (const void *)1);
         ck_assert_int_eq(list_size(list), 1);
@@ -70,26 +70,6 @@ START_TEST (test_list_ins_next)
         ck_assert_int_eq(list_data(list_head(list)), 1);
         ck_assert_int_eq(list_data(list_tail(list)), 3);
         ck_assert_int_eq(list_data(list_next(list_head(list))), 2);
-
-        list_destroy(list);
-	free(list);
-}
-END_TEST
-
-START_TEST (test_list_rem_next)
-{
-        List *list = NULL;
-        int *data = NULL;
-        int ret;
-
-        list = (List *)malloc(sizeof(List));
-        ck_assert_ptr_ne(list, NULL);
-
-        list_init(list, NULL);
-
-        list_ins_next(list, NULL, (const void *)1);
-        list_ins_next(list, list_head(list), (const void *)2);
-        list_ins_next(list, list_tail(list), (const void *)3);
 
         ret = list_rem_next(list, NULL, (void **)&data);
         ck_assert_int_eq(ret, 0);
@@ -111,15 +91,18 @@ START_TEST (test_list_rem_next)
         ret = list_rem_next(list, NULL, (void **)&data);
         ck_assert_int_eq(ret, -1);
         
-        list_destroy(list);
+        ret = list_destroy(list);
+        ck_assert_int_eq(ret, 0);
+        
 	free(list);
 }
 END_TEST
 
-START_TEST (test_dlist_init)
+START_TEST (test_dlist_1)
 {
         DList *list = NULL;
-        int ret = 0;
+        int ret;
+        void *data;
 
         list = (DList *)malloc(sizeof(DList));
         ck_assert_ptr_ne(list, NULL);
@@ -129,37 +112,6 @@ START_TEST (test_dlist_init)
         ck_assert_int_eq(dlist_size(list), 0);
         ck_assert_ptr_eq(dlist_head(list), NULL);
         ck_assert_ptr_eq(dlist_tail(list), NULL);
-
-        dlist_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_dlist_destroy)
-{
-        DList *list = NULL;
-        int ret;
-
-        list = (DList *)malloc(sizeof(DList));
-        ck_assert_ptr_ne(list, NULL);
-
-        dlist_init(list, NULL);
-
-        ret = dlist_destroy(list);
-        ck_assert_int_eq(ret, 0);
-
-        free(list);
-}
-END_TEST
-
-START_TEST (test_dlist_ins_next)
-{
-        DList *list = NULL;
-
-        list = (DList *)malloc(sizeof(DList));
-        ck_assert_ptr_ne(list, NULL);
-
-        dlist_init(list, NULL);
 
         dlist_ins_next(list, NULL, (const void *)1);
         ck_assert_int_eq(dlist_size(list), 1);
@@ -179,59 +131,6 @@ START_TEST (test_dlist_ins_next)
         ck_assert_int_eq(dlist_data(dlist_tail(list)), 3);
         ck_assert_int_eq(dlist_data(dlist_next(dlist_head(list))), 2);
         ck_assert_int_eq(dlist_data(dlist_prev(dlist_tail(list))), 2);
-
-        dlist_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_dlist_ins_prev)
-{
-        DList *list = NULL;
-
-        list = (DList *)malloc(sizeof(DList));
-        ck_assert_ptr_ne(list, NULL);
-
-        dlist_init(list, NULL);
-
-        dlist_ins_prev(list, NULL, (const void *)1);
-        ck_assert_int_eq(dlist_size(list), 1);
-        ck_assert_int_eq(dlist_data(dlist_head(list)), 1);
-        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
-
-        dlist_ins_prev(list, dlist_head(list), (const void *)2);
-        ck_assert_int_eq(dlist_size(list), 2);
-        ck_assert_int_eq(dlist_data(dlist_head(list)), 2);
-        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
-        ck_assert_int_eq(dlist_data(dlist_next(dlist_head(list))), 1);
-        ck_assert_int_eq(dlist_data(dlist_prev(dlist_tail(list))), 2);
-
-        dlist_ins_prev(list, dlist_tail(list), (const void *)3);
-        ck_assert_int_eq(dlist_size(list), 3);
-        ck_assert_int_eq(dlist_data(dlist_head(list)), 2);
-        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
-        ck_assert_int_eq(dlist_data(dlist_next(dlist_head(list))), 3);
-        ck_assert_int_eq(dlist_data(dlist_prev(dlist_tail(list))), 3);
-
-        dlist_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_dlist_remove)
-{
-        DList *list = NULL;
-        int *data = NULL;
-        int ret;
-
-        list = (DList *)malloc(sizeof(DList));
-        ck_assert_ptr_ne(list, NULL);
-
-        dlist_init(list, NULL);
-
-        dlist_ins_next(list, NULL, (const void *)1);
-        dlist_ins_next(list, dlist_head(list), (const void *)2);
-        dlist_ins_next(list, dlist_tail(list), (const void *)3);
 
         ret = dlist_remove(list, dlist_head(list), (void **)&data);
         ck_assert_int_eq(ret, 0);
@@ -257,15 +156,83 @@ START_TEST (test_dlist_remove)
         ret = dlist_remove(list, dlist_head(list), (void **)&data);
         ck_assert_int_eq(ret, -1);
         
-        dlist_destroy(list);
+        ret = dlist_destroy(list);
+        ck_assert_int_eq(ret, 0);
+        
         free(list);
 }
 END_TEST
 
-START_TEST (test_clist_init)
+START_TEST (test_dlist_2)
+{
+        DList *list = NULL;
+        int ret;
+        void *data;
+
+        list = (DList *)malloc(sizeof(DList));
+        ck_assert_ptr_ne(list, NULL);
+
+        ret = dlist_init(list, NULL);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(dlist_size(list), 0);
+        ck_assert_ptr_eq(dlist_head(list), NULL);
+        ck_assert_ptr_eq(dlist_tail(list), NULL);
+
+        dlist_ins_prev(list, NULL, (const void *)1);
+        ck_assert_int_eq(dlist_size(list), 1);
+        ck_assert_int_eq(dlist_data(dlist_head(list)), 1);
+        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
+
+        dlist_ins_prev(list, dlist_head(list), (const void *)2);
+        ck_assert_int_eq(dlist_size(list), 2);
+        ck_assert_int_eq(dlist_data(dlist_head(list)), 2);
+        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
+        ck_assert_int_eq(dlist_data(dlist_next(dlist_head(list))), 1);
+        ck_assert_int_eq(dlist_data(dlist_prev(dlist_tail(list))), 2);
+
+        dlist_ins_prev(list, dlist_tail(list), (const void *)3);
+        ck_assert_int_eq(dlist_size(list), 3);
+        ck_assert_int_eq(dlist_data(dlist_head(list)), 2);
+        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
+        ck_assert_int_eq(dlist_data(dlist_next(dlist_head(list))), 3);
+        ck_assert_int_eq(dlist_data(dlist_prev(dlist_tail(list))), 3);
+
+        ret = dlist_remove(list, dlist_head(list), (void **)&data);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(dlist_size(list), 2);
+        ck_assert_int_eq(data, 2);
+        ck_assert_int_eq(dlist_data(dlist_head(list)), 3);
+        ck_assert_int_eq(dlist_data(dlist_tail(list)), 1);
+
+        ret = dlist_remove(list, dlist_tail(list), (void **)&data);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(dlist_size(list), 1);
+        ck_assert_int_eq(data, 1);
+        ck_assert_int_eq(dlist_data(dlist_head(list)), 3);
+        ck_assert_int_eq(dlist_data(dlist_tail(list)), 3);
+
+        ret = dlist_remove(list, dlist_head(list), (void **)&data);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(dlist_size(list), 0);
+        ck_assert_int_eq(data, 3);
+        ck_assert_ptr_eq(dlist_head(list), NULL);
+        ck_assert_ptr_eq(dlist_tail(list), NULL);
+
+        ret = dlist_remove(list, dlist_head(list), (void **)&data);
+        ck_assert_int_eq(ret, -1);
+        
+        ret = dlist_destroy(list);
+        ck_assert_int_eq(ret, 0);
+        
+        free(list);
+}
+END_TEST
+
+START_TEST (test_clist)
 {
         CList *list = NULL;
-        int ret = 0;
+        int ret;
+        void *data;
 
         list = (CList *)malloc(sizeof(CList));
         ck_assert_ptr_ne(list, NULL);
@@ -274,37 +241,6 @@ START_TEST (test_clist_init)
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(clist_size(list), 0);
         ck_assert_ptr_eq(clist_head(list), NULL);
-
-        clist_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_clist_destroy)
-{
-        CList *list = NULL;
-        int ret = 0;
-
-        list = (CList *)malloc(sizeof(CList));
-        ck_assert_ptr_ne(list, NULL);
-
-        clist_init(list, NULL);
-
-        ret = clist_destroy(list);
-        ck_assert_int_eq(ret, 0);
-
-        free(list);
-}
-END_TEST
-
-START_TEST (test_clist_ins_next)
-{
-        CList *list = NULL;
-
-        list = (CList *)malloc(sizeof(CList));
-        ck_assert_ptr_ne(list, NULL);
-
-        clist_init(list, NULL);
 
         clist_ins_next(list, NULL, (const void *)1);
         ck_assert_int_eq(clist_size(list), 1);
@@ -320,27 +256,6 @@ START_TEST (test_clist_ins_next)
         ck_assert_int_eq(clist_data(clist_head(list)), 1);
         ck_assert_int_eq(clist_data(clist_next(clist_head(list))), 3);
         ck_assert_int_eq(clist_data(clist_next(clist_next(clist_head(list)))), 2);
-
-        clist_destroy(list);
-        free(list);
-}
-END_TEST
-
-START_TEST (test_clist_rem_next)
-{
-        CList *list = NULL;
-        int *data = NULL;
-        int ret;
-
-        list = (CList *)malloc(sizeof(CList));
-        ck_assert_ptr_ne(list, NULL);
-
-        clist_init(list, NULL);
-
-        clist_ins_next(list, NULL, (const void *)1);
-        clist_ins_next(list, clist_head(list), (const void *)2);
-        clist_ins_next(list, clist_head(list), (const void *)3);
-        ck_assert_int_eq(clist_size(list), 3);
 
         ret = clist_rem_next(list, clist_head(list),  (void **)&data);
         ck_assert_int_eq(ret, 0);
@@ -360,15 +275,18 @@ START_TEST (test_clist_rem_next)
         ret = clist_rem_next(list, clist_head(list), (void **)&data);
         ck_assert_int_eq(ret, -1);
         
-        clist_destroy(list);
+        ret = clist_destroy(list);
+        ck_assert_int_eq(ret, 0);
+        
         free(list);
 }
 END_TEST
 
-START_TEST (test_stack_init)
+START_TEST (test_stack)
 {
         Stack *stack = NULL;
-        int ret = 0;
+        int ret;
+        void *data;
 
         stack = (Stack *)malloc(sizeof(Stack));
         ck_assert_ptr_ne(stack, NULL);
@@ -376,37 +294,6 @@ START_TEST (test_stack_init)
         ret = stack_init(stack, NULL);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(stack_size(stack), 0);
-
-        stack_destroy(stack);
-        free(stack);
-}
-END_TEST
-
-START_TEST (test_stack_destroy)
-{
-        Stack *stack = NULL;
-        int ret = 0;
-
-        stack = (Stack *)malloc(sizeof(Stack));
-        ck_assert_ptr_ne(stack, NULL);
-
-        stack_init(stack, NULL);
-        
-        ret = stack_destroy(stack);
-        ck_assert_int_eq(ret, 0);
-
-        free(stack);
-}
-END_TEST
-
-START_TEST (test_stack_push)
-{
-        Stack *stack = NULL;
-
-        stack = (Stack *)malloc(sizeof(Stack));
-        ck_assert_ptr_ne(stack, NULL);
-
-        stack_init(stack, NULL);
 
         stack_push(stack, (const void *)1);
         ck_assert_int_eq(stack_size(stack), 1);
@@ -420,26 +307,9 @@ START_TEST (test_stack_push)
         ck_assert_int_eq(stack_size(stack), 3);
         ck_assert_int_eq(stack_peek(stack), 3);
 
-        stack_destroy(stack);
-        free(stack);
-}
-END_TEST
-
-START_TEST (test_stack_pop)
-{
-        Stack *stack = NULL;
-        int *data;
-        int ret;
-
-        stack = (Stack *)malloc(sizeof(Stack));
-        ck_assert_ptr_ne(stack, NULL);
-
-        stack_init(stack, NULL);
-        
-        stack_push(stack, (const void *)1);
-        stack_push(stack, (const void *)2);
-        stack_push(stack, (const void *)3);
         stack_push(stack, (const void *)4);
+        ck_assert_int_eq(stack_size(stack), 4);
+        ck_assert_int_eq(stack_peek(stack), 4);
 
         ret = stack_pop(stack, (void **)&data);
         ck_assert_int_eq(ret, 0);
@@ -463,16 +333,19 @@ START_TEST (test_stack_pop)
 
         ret = stack_pop(stack, (void **)&data);
         ck_assert_int_eq(ret, -1);
-
-        stack_destroy(stack);
+        
+        ret = stack_destroy(stack);
+        ck_assert_int_eq(ret, 0);
+        
         free(stack);
 }
 END_TEST
 
-START_TEST (test_queue_init)
+START_TEST (test_queue)
 {
         Queue *queue;
         int ret;
+        void *data;
 
         queue = (Queue *)malloc(sizeof(Queue));
         ck_assert_ptr_ne(queue, NULL);
@@ -480,37 +353,6 @@ START_TEST (test_queue_init)
         ret = queue_init(queue, NULL);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(queue_size(queue), 0);
-
-        queue_destroy(queue);
-        free(queue);
-}
-END_TEST
-
-START_TEST (test_queue_destroy)
-{
-        Queue *queue;
-        int ret;
-
-        queue = (Queue *)malloc(sizeof(Queue));
-        ck_assert_ptr_ne(queue, NULL);
-
-        queue_init(queue, NULL);
-
-        ret = queue_destroy(queue);
-        ck_assert_int_eq(ret, 0);
-
-        free(queue);
-}
-END_TEST
-
-START_TEST (test_queue_enqueue)
-{
-        Queue *queue;
-
-        queue = (Queue *)malloc(sizeof(Queue));
-        ck_assert_ptr_ne(queue, NULL);
-
-        queue_init(queue, NULL);
 
         queue_enqueue(queue, (const void *)1);
         ck_assert_int_eq(queue_size(queue), 1);
@@ -524,26 +366,9 @@ START_TEST (test_queue_enqueue)
         ck_assert_int_eq(queue_size(queue), 3);
         ck_assert_int_eq(queue_peek(queue), 1);
 
-        queue_destroy(queue);
-        free(queue);
-}
-END_TEST
-
-START_TEST (test_queue_dequeue)
-{
-        Queue *queue;
-        int *data;
-        int ret;
-
-        queue = (Queue *)malloc(sizeof(Queue));
-        ck_assert_ptr_ne(queue, NULL);
-
-        queue_init(queue, NULL);
-
-        queue_enqueue(queue, (const void *)1);
-        queue_enqueue(queue, (const void *)2);
-        queue_enqueue(queue, (const void *)3);
         queue_enqueue(queue, (const void *)4);
+        ck_assert_int_eq(queue_size(queue), 4);
+        ck_assert_int_eq(queue_peek(queue), 1);
 
         ret = queue_dequeue(queue, (void **)&data);
         ck_assert_int_eq(ret, 0);
@@ -567,60 +392,26 @@ START_TEST (test_queue_dequeue)
 
         ret = queue_dequeue(queue, (void **)&data);
         ck_assert_int_eq(ret, -1);
+        
+        ret = queue_destroy(queue);
+        ck_assert_int_eq(ret, 0);
 
-        queue_destroy(queue);
         free(queue);
 }
 END_TEST
 
-int set_match(const void *key1, const void *key2)
-{
-        return key1 == key2;
-}
-
-START_TEST (test_set_init)
+START_TEST (test_set)
 {
         Set *set;
         int ret;
+        void *data;
 
         set = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(set, NULL);
 
-        ret = set_init(set, set_match, NULL);
+        ret = set_init(set, match, NULL);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(set_size(set), 0);
-
-        set_destroy(set);
-        free(set);
-}
-END_TEST
-
-START_TEST (test_set_destroy)
-{
-        Set *set;
-        int ret;
-
-        set = (Set *)malloc(sizeof(Set));
-        ck_assert_ptr_ne(set, NULL);
-
-        set_init(set, set_match, NULL);
-
-        ret = set_destroy(set);
-        ck_assert_int_eq(ret, 0);
-
-        free(set);
-}
-END_TEST
-
-START_TEST (test_set_insert)
-{
-        Set *set;
-        int ret;
-
-        set = (Set *)malloc(sizeof(Set));
-        ck_assert_ptr_ne(set, NULL);
-
-        set_init(set, set_match, NULL);
 
         ret = set_insert(set, (const void *)1);
         ck_assert_int_eq(ret, 0);
@@ -638,57 +429,39 @@ START_TEST (test_set_insert)
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(set_size(set), 3);
 
-        set_destroy(set);
-        free(set);
-}
-END_TEST
-
-START_TEST (test_set_remove)
-{
-        Set *set;
-        int *data;
-        int ret;
-
-        set = (Set *)malloc(sizeof(Set));
-        ck_assert_ptr_ne(set, NULL);
-
-        set_init(set, set_match, NULL);
-
-        set_insert(set, (const void *)1);
-        set_insert(set, (const void *)2);
-        set_insert(set, (const void *)3);
-
-        data = (int *)1; /** be careful */
+        data = (void *)1; /** be careful */
         ret = set_remove(set, (void **)&data);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(set_size(set), 2);
         ck_assert_int_eq(data, 1);
 
-        data = (int *)4;
+        data = (void *)4;
         ret = set_remove(set, (void **)&data);
         ck_assert_int_eq(ret, -1);
         ck_assert_int_eq(set_size(set), 2);
         ck_assert_int_eq(data, 4);
 
-        data = (int *)2;
+        data = (void *)2;
         ret = set_remove(set, (void **)&data);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(set_size(set), 1);
         ck_assert_int_eq(data, 2);
 
-        data = (int *)3;
+        data = (void *)3;
         ret = set_remove(set, (void **)&data);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(set_size(set), 0);
         ck_assert_int_eq(data, 3);
 
-        data = (int *)1;
+        data = (void *)1;
         ret = set_remove(set, (void **)&data);
         ck_assert_int_eq(ret, -1);
         ck_assert_int_eq(set_size(set), 0);
         ck_assert_int_eq(data, 1);
 
-        set_destroy(set);
+        ret = set_destroy(set);
+        ck_assert_int_eq(ret, 0);
+
         free(set);
 }
 END_TEST
@@ -707,8 +480,8 @@ START_TEST (test_set_union)
         setu = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(setu, NULL);
 
-        set_init(set1, set_match, NULL);
-        set_init(set2, set_match, NULL);
+        set_init(set1, match, NULL);
+        set_init(set2, match, NULL);
 
         set_insert(set1, (const void *)1);
         set_insert(set1, (const void *)2);
@@ -753,8 +526,8 @@ START_TEST (test_set_intersection)
         seti = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(seti, NULL);
 
-        set_init(set1, set_match, NULL);
-        set_init(set2, set_match, NULL);
+        set_init(set1, match, NULL);
+        set_init(set2, match, NULL);
 
         set_insert(set1, (const void *)1);
         set_insert(set1, (const void *)2);
@@ -799,8 +572,8 @@ START_TEST (test_set_difference)
         setd = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(setd, NULL);
 
-        set_init(set1, set_match, NULL);
-        set_init(set2, set_match, NULL);
+        set_init(set1, match, NULL);
+        set_init(set2, match, NULL);
 
         set_insert(set1, (const void *)1);
         set_insert(set1, (const void *)2);
@@ -838,7 +611,7 @@ START_TEST (test_set_is_member)
         set = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(set, NULL);
 
-        set_init(set, set_match, NULL);
+        set_init(set, match, NULL);
 
         set_insert(set, (const void *)1);
         set_insert(set, (const void *)2);
@@ -869,8 +642,8 @@ START_TEST (test_set_is_subset)
         set2 = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(set2, NULL);
 
-        set_init(set1, set_match, NULL);
-        set_init(set2, set_match, NULL);
+        set_init(set1, match, NULL);
+        set_init(set2, match, NULL);
 
         set_insert(set1, (const void *)1);
         set_insert(set1, (const void *)2);
@@ -914,8 +687,8 @@ START_TEST (test_set_is_equal)
         set2 = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(set2, NULL);
 
-        set_init(set1, set_match, NULL);
-        set_init(set2, set_match, NULL);
+        set_init(set1, match, NULL);
+        set_init(set2, match, NULL);
 
         set_insert(set1, (const void *)1);
         set_insert(set1, (const void *)2);
@@ -991,16 +764,16 @@ START_TEST (test_set_cover)
         s7 = (Set *)malloc(sizeof(Set));
         ck_assert_ptr_ne(s7, NULL);
 
-        set_init(members, set_match, NULL);
-        set_init(subsets, set_match, NULL);
-        set_init(cover, set_match, NULL);
-        set_init(s1, set_match, NULL);
-        set_init(s2, set_match, NULL);
-        set_init(s3, set_match, NULL);
-        set_init(s4, set_match, NULL);
-        set_init(s5, set_match, NULL);
-        set_init(s6, set_match, NULL);
-        set_init(s7, set_match, NULL);
+        set_init(members, match, NULL);
+        set_init(subsets, match, NULL);
+        set_init(cover, match, NULL);
+        set_init(s1, match, NULL);
+        set_init(s2, match, NULL);
+        set_init(s3, match, NULL);
+        set_init(s4, match, NULL);
+        set_init(s5, match, NULL);
+        set_init(s6, match, NULL);
+        set_init(s7, match, NULL);
 
         set_insert(s1, (const void *)1);
         set_insert(s1, (const void *)2);
@@ -1128,190 +901,7 @@ START_TEST (test_set_cover)
 }
 END_TEST
 
-static int tree_compare(const void *data1, const void *data2)
-{
-        if (data1 < data2) {
-                return -1;
-        } else if (data1 > data2) {
-                return 1;
-        } else {
-                return 0;
-        }
-}
-
-START_TEST (test_bistree_init)
-{
-        BisTree *tree;
-        int ret;
-
-        tree = (BisTree *)malloc(sizeof(BisTree));
-        ck_assert_ptr_ne(tree, NULL);
-
-        ret = bistree_init(tree, tree_compare, NULL);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 0);
-
-        bistree_destroy(tree);
-        free(tree);
-}
-END_TEST
-
-START_TEST (test_bistree_destroy)
-{
-        BisTree *tree;
-        int ret;
-
-        tree = (BisTree *)malloc(sizeof(BisTree));
-        ck_assert_ptr_ne(tree, NULL);
-
-        bistree_init(tree, tree_compare, NULL);
-
-        ret = bistree_destroy(tree);
-        ck_assert_int_eq(ret, 0);
-
-        free(tree);
-}
-END_TEST
-
-START_TEST (test_bistree_insert)
-{
-        BisTree *tree;
-        int ret;
-
-        tree = (BisTree *)malloc(sizeof(BisTree));
-        ck_assert_ptr_ne(tree, NULL);
-
-        bistree_init(tree, tree_compare, NULL);
-
-        ret = bistree_insert(tree, (const void *)27);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 1);
-
-        ret = bistree_insert(tree, (const void *)45);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 2);
-
-        ret = bistree_insert(tree, (const void *)34);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 3);
-
-        ret = bistree_insert(tree, (const void *)20);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 4);
-
-        ret = bistree_insert(tree, (const void *)11);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 5);
-
-        ret = bistree_insert(tree, (const void *)59);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 6);
-
-        ret = bistree_insert(tree, (const void *)10);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 7);
-        
-        ret = bistree_insert(tree, (const void *)25);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 8);
-
-        ret = bistree_insert(tree, (const void *)29);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 9);
-
-        ret = bistree_insert(tree, (const void *)30);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 10);
-
-        bistree_preorder_dump(tree, dump);
-        printf("\n");
-        bistree_inorder_dump(tree, dump);
-        printf("\n");
-        bistree_postorder_dump(tree, dump);
-        printf("\n");
-        
-        ret = bistree_destroy(tree);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 0);
-
-        free(tree);
-}
-END_TEST
-
-START_TEST (test_bistree_remove)
-{
-        BisTree *tree;
-        int ret;
-
-        tree = (BisTree *)malloc(sizeof(BisTree));
-        ck_assert_ptr_ne(tree, NULL);
-
-        bistree_init(tree, tree_compare, NULL);
-
-        ret = bistree_insert(tree, (const void *)27);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 1);
-
-        ret = bistree_insert(tree, (const void *)45);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 2);
-
-        ret = bistree_insert(tree, (const void *)34);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 3);
-
-        ret = bistree_insert(tree, (const void *)20);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 4);
-
-        ret = bistree_insert(tree, (const void *)11);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 5);
-
-        ret = bistree_insert(tree, (const void *)59);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 6);
-
-        ret = bistree_insert(tree, (const void *)10);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 7);
-        
-        ret = bistree_insert(tree, (const void *)25);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 8);
-
-        ret = bistree_insert(tree, (const void *)29);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 9);
-
-        ret = bistree_insert(tree, (const void *)30);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 10);
-
-        ret = bistree_remove(tree, (const void *)27);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 10);
-
-        ret = bistree_remove(tree, (const void *)34);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 10);
-
-        bistree_preorder_dump(tree, dump);
-        printf("\n");
-        bistree_inorder_dump(tree, dump);
-        printf("\n");
-        bistree_postorder_dump(tree, dump);
-        printf("\n");
-        
-        ret = bistree_destroy(tree);
-        ck_assert_int_eq(ret, 0);
-        ck_assert_int_eq(bistree_size(tree), 0);
-
-        free(tree);
-}
-END_TEST
-
-START_TEST (test_bistree_lookup)
+START_TEST (test_bistree)
 {
         BisTree *tree;
         int ret;
@@ -1320,7 +910,9 @@ START_TEST (test_bistree_lookup)
         tree = (BisTree *)malloc(sizeof(BisTree));
         ck_assert_ptr_ne(tree, NULL);
 
-        bistree_init(tree, tree_compare, NULL);
+        ret = bistree_init(tree, compare, NULL);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(bistree_size(tree), 0);
 
         ret = bistree_insert(tree, (const void *)27);
         ck_assert_int_eq(ret, 0);
@@ -1361,6 +953,13 @@ START_TEST (test_bistree_lookup)
         ret = bistree_insert(tree, (const void *)30);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(bistree_size(tree), 10);
+
+        bistree_preorder_dump(tree, dump);
+        printf("\n");
+        bistree_inorder_dump(tree, dump);
+        printf("\n");
+        bistree_postorder_dump(tree, dump);
+        printf("\n");
 
         data = (void *)5;
         ret = bistree_lookup(tree, &data);
@@ -1402,6 +1001,13 @@ START_TEST (test_bistree_lookup)
         ret = bistree_lookup(tree, &data);
         ck_assert_int_eq(ret, -1);
         
+        bistree_preorder_dump(tree, dump);
+        printf("\n");
+        bistree_inorder_dump(tree, dump);
+        printf("\n");
+        bistree_postorder_dump(tree, dump);
+        printf("\n");
+        
         ret = bistree_destroy(tree);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(bistree_size(tree), 0);
@@ -1410,115 +1016,96 @@ START_TEST (test_bistree_lookup)
 }
 END_TEST
 
-Suite *list_suite(void)
+START_TEST (test_heap)
 {
-        Suite *s;
-        TCase *tc_core;
+        Heap *heap;
+        int ret, i;
+        int datas[] = {7, 9, 10, 12, 15, 17, 18, 19, 20, 22, 24, 25};
+        void *top;
 
-        s = suite_create("List_Suite");
+        heap = (Heap *)malloc(sizeof(Heap));
+        ck_assert_ptr_ne(heap, NULL);
 
-        tc_core = tcase_create("Core");
+        ret = heap_init(heap, compare, NULL);
+        ck_assert_int_eq(ret, 0);
 
-        tcase_add_test(tc_core, test_list_init);
-        tcase_add_test(tc_core, test_list_destroy);
-        tcase_add_test(tc_core, test_list_ins_next);
-        tcase_add_test(tc_core, test_list_rem_next);
+        for (i = 0; i < sizeof(datas) / sizeof(datas[0]); i++) {
+                ret = heap_insert(heap, (const void *)datas[i]);
+                ck_assert_int_eq(ret, 0);
+                ck_assert_int_eq(heap_size(heap), i + 1);
+        }
 
-        suite_add_tcase(s, tc_core);
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 25);
+        ck_assert_int_eq(heap_size(heap), --i);
 
-        return s;
-}
-
-Suite *dlist_suite(void)
-{
-        Suite *s;
-        TCase *tc_core;
-
-        s = suite_create("DList_Suite");
-
-        tc_core = tcase_create("Core");
-
-        tcase_add_test(tc_core, test_dlist_init);
-        tcase_add_test(tc_core, test_dlist_destroy);
-        tcase_add_test(tc_core, test_dlist_ins_next);
-        tcase_add_test(tc_core, test_dlist_ins_prev);
-        tcase_add_test(tc_core, test_dlist_remove);
-
-        suite_add_tcase(s, tc_core);
-
-        return s;
-}
-
-Suite *clist_suite(void)
-{
-        Suite *s;
-        TCase *tc_core;
-
-        s = suite_create("CList_Suite");
-
-        tc_core = tcase_create("Core");
-
-        tcase_add_test(tc_core, test_clist_init);
-        tcase_add_test(tc_core, test_clist_destroy);
-        tcase_add_test(tc_core, test_clist_ins_next);
-        tcase_add_test(tc_core, test_clist_rem_next);
-
-        suite_add_tcase(s, tc_core);
-
-        return s;
-}
-
-Suite *stack_suite(void)
-{
-        Suite *s;
-        TCase *tc_core;
-
-        s = suite_create("Stack_Suite");
-
-        tc_core = tcase_create("Core");
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 24);
+        ck_assert_int_eq(heap_size(heap), --i);
         
-        tcase_add_test(tc_core, test_stack_init);
-        tcase_add_test(tc_core, test_stack_destroy);
-        tcase_add_test(tc_core, test_stack_push);
-        tcase_add_test(tc_core, test_stack_pop);
-
-        suite_add_tcase(s, tc_core);
-
-        return s;
-}
-
-Suite *queue_suite(void)
-{
-        Suite *s;
-        TCase *tc_core;
-
-        s = suite_create("Queue_Suite");
-
-        tc_core = tcase_create("Core");
-
-        tcase_add_test(tc_core, test_queue_init);
-        tcase_add_test(tc_core, test_queue_destroy);
-        tcase_add_test(tc_core, test_queue_enqueue);
-        tcase_add_test(tc_core, test_queue_dequeue);
+        ret = heap_destroy(heap);
+        ck_assert_int_eq(ret, 0);
         
-        suite_add_tcase(s, tc_core);
-
-        return s;
+        free(heap);
 }
+END_TEST
 
-Suite *set_suite(void)
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+
+START_TEST (test_issort)
+{
+        int data[] = {23, 21, 76, 16, 52, 43};
+        int ret;
+
+        ret = issort(data, ARRAY_SIZE(data), sizeof(data[0]), sort_compare);
+        ck_assert_int_eq(ret, 0);
+
+        ck_assert_int_eq(data[0], 16);
+        ck_assert_int_eq(data[1], 21);
+        ck_assert_int_eq(data[2], 23);
+        ck_assert_int_eq(data[3], 43);
+        ck_assert_int_eq(data[4], 52);
+        ck_assert_int_eq(data[5], 76);
+}
+END_TEST
+
+START_TEST (test_qksort)
+{
+        int data[] = {23, 21, 76, 16, 52, 43};
+        int ret;
+
+        ret = qksort(data, ARRAY_SIZE(data), sizeof(data[0]), sort_compare);
+        ck_assert_int_eq(ret, 0);
+
+        ck_assert_int_eq(data[0], 16);
+        ck_assert_int_eq(data[1], 21);
+        ck_assert_int_eq(data[2], 23);
+        ck_assert_int_eq(data[3], 43);
+        ck_assert_int_eq(data[4], 52);
+        ck_assert_int_eq(data[5], 76);
+}
+END_TEST
+
+Suite *ds_suite(void)
 {
         Suite *s;
         TCase *tc_core;
 
-        s = suite_create("Set_Suite");
+        s = suite_create("Data Structure Suite");
 
         tc_core = tcase_create("Core");
 
-        tcase_add_test(tc_core, test_set_init);
-        tcase_add_test(tc_core, test_set_destroy);
-        tcase_add_test(tc_core, test_set_insert);
-        tcase_add_test(tc_core, test_set_remove);
+        tcase_add_test(tc_core, test_list);
+        tcase_add_test(tc_core, test_dlist_1);
+        tcase_add_test(tc_core, test_dlist_2);
+        tcase_add_test(tc_core, test_clist);
+        tcase_add_test(tc_core, test_stack);
+        tcase_add_test(tc_core, test_queue);
+        tcase_add_test(tc_core, test_heap);
+
+        tcase_add_test(tc_core, test_set);
         tcase_add_test(tc_core, test_set_union);
         tcase_add_test(tc_core, test_set_intersection);
         tcase_add_test(tc_core, test_set_difference);
@@ -1526,26 +1113,26 @@ Suite *set_suite(void)
         tcase_add_test(tc_core, test_set_is_subset);
         tcase_add_test(tc_core, test_set_is_equal);
         tcase_add_test(tc_core, test_set_cover);
-        
+
+        tcase_add_test(tc_core, test_bistree);
+        tcase_add_test(tc_core, test_heap);
+
         suite_add_tcase(s, tc_core);
 
         return s;
 }
 
-Suite *bistree_suite(void)
+Suite * al_suite(void)
 {
         Suite *s;
         TCase *tc_core;
 
-        s = suite_create("BisTree_Suite");
+        s = suite_create("Algorithm Suite");
 
         tc_core = tcase_create("Core");
 
-        tcase_add_test(tc_core, test_bistree_init);
-        tcase_add_test(tc_core, test_bistree_destroy);
-        tcase_add_test(tc_core, test_bistree_insert);
-        tcase_add_test(tc_core, test_bistree_remove);
-        tcase_add_test(tc_core, test_bistree_lookup);
+        tcase_add_test(tc_core, test_issort);
+        tcase_add_test(tc_core, test_qksort);
         
         suite_add_tcase(s, tc_core);
 
@@ -1558,13 +1145,8 @@ int main(int argc, char *argv[])
         
         sr = srunner_create(NULL);
 
-        srunner_add_suite(sr, list_suite());
-        srunner_add_suite(sr, dlist_suite());
-        srunner_add_suite(sr, clist_suite());
-        srunner_add_suite(sr, stack_suite());
-        srunner_add_suite(sr, queue_suite());
-        srunner_add_suite(sr, set_suite());
-        srunner_add_suite(sr, bistree_suite());
+        srunner_add_suite(sr, ds_suite());
+        srunner_add_suite(sr, al_suite());
         
         srunner_run_all(sr, CK_VERBOSE);
 
