@@ -111,3 +111,156 @@ int qksort(void *data, int size, int esize, fp_compare compare)
 {
         return qksort_inner(data, size, esize, 0, size - 1, compare);
 }
+
+static int merge(void *data, int esize, int i, int j, int k, fp_compare compare)
+{
+        char *a = data;
+        char *merged;
+        int ipos, jpos, mpos;
+
+        ipos = i;
+        jpos = j + 1;
+        mpos = 0;
+
+        if ((merged = (char *)malloc(esize * (k - i + 1))) == NULL) {
+                return -1;
+        }
+
+        while (ipos <= j || jpos <= k) {
+                if (ipos > j) {
+                        while (jpos <= k) {
+                                memcpy(&merged[mpos * esize], &a[jpos * esize], esize);
+                                jpos++;
+                                mpos++;
+                        }
+                } else if (jpos > k) {
+                        while (ipos <= j) {
+                                memcpy(&merged[mpos * esize], &a[ipos * esize], esize);
+                                ipos++;
+                                mpos++;
+                        }
+                } else {
+                        if (compare(&a[ipos * esize], &a[jpos * esize]) < 0) {
+                                memcpy(&merged[mpos * esize], &a[ipos * esize], esize);
+                                ipos++;
+                                mpos++;
+                        } else {
+                                memcpy(&merged[mpos * esize], &a[jpos * esize], esize);
+                                jpos++;
+                                mpos++;
+                        }
+                }
+        }
+
+        memcpy(&a[i * esize], merged, esize * (k - i + 1));
+
+        free(merged);
+
+        return 0;
+}
+
+static int mgsort_inner(void *data, int size, int esize, int i, int k, fp_compare compare)
+{
+        int j;
+
+        if (i < k) {
+                j = (i + k - 1) >> 1;
+
+                if (mgsort_inner(data, size, esize, i, j, compare) < 0) {
+                        return -1;
+                }
+
+                if (mgsort_inner(data, size, esize, j + 1, k, compare) < 0) {
+                        return -1;
+                }
+
+                if (merge(data, esize, i, j, k, compare) < 0) {
+                        return -1;
+                }
+        }
+
+        return 0;
+}
+
+int mgsort(void *data, int size, int esize, fp_compare compare)
+{
+        return mgsort_inner(data, size, esize, 0, size - 1, compare);
+}
+
+int ctsort(int *data, int size, int k)
+{
+        int *counts, *tmp;
+        int i;
+
+        if ((counts = (int *)malloc(k * sizeof(int))) == NULL) {
+                return -1;
+        }
+
+        if ((tmp = (int *)malloc(size * sizeof(int))) == NULL) {
+                return -1;
+        }
+
+        memset(counts, 0, k * sizeof(int));
+
+        for (i = 0; i < size; i++) {
+                counts[data[i]]++;
+        }
+
+        for (i = 1; i < k; i++) {
+                counts[i] += counts[i - 1];
+        }
+
+        for (i = size - 1; i >= 0; i--) {
+                tmp[counts[data[i]] - 1] = data[i];
+                counts[data[i]]--;
+        }
+
+        memcpy(data, tmp, size * sizeof(int));
+
+        free(counts);
+        free(tmp);
+
+        return 0;
+}
+
+int rxsort(int *data, int size, int p, int k)
+{
+        int *counts, *tmp;
+        int index, pval, i, n;
+
+        if ((counts = (int *)malloc(k * sizeof(int))) == NULL) {
+                return -1;
+        }
+
+        if ((tmp = (int *)malloc(size * sizeof(int))) == NULL) {
+                return -1;
+        }
+
+        for (n = 0; n < p; n++) {
+                memset(counts, 0, k * sizeof(int));
+
+                pval = pow(k, n);
+
+                for (i = 0; i < size; i++) {
+                        index = (data[i] / pval) % k;
+                        counts[index]++;
+                }
+
+                for (i = 1; i < k; i++) {
+                        counts[i] += counts[i - 1];
+                }
+
+                for (i = size - 1; i >= 0; i--) {
+                        index = (data[i] / pval) % k;
+                        tmp[counts[index] - 1] = data[i];
+                        counts[index]--;
+                }
+
+                memcpy(data, tmp, size * sizeof(int));
+        }
+
+        free(counts);
+        free(tmp);
+
+        return 0;
+}

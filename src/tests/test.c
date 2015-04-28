@@ -1020,7 +1020,7 @@ START_TEST (test_heap)
 {
         Heap *heap;
         int ret, i;
-        int datas[] = {7, 9, 10, 12, 15, 17, 18, 19, 20, 22, 24, 25};
+        int datas[] = {15, 17, 18, 19, 20, 22, 24, 25};
         void *top;
 
         heap = (Heap *)malloc(sizeof(Heap));
@@ -1043,6 +1043,36 @@ START_TEST (test_heap)
         ret = heap_extract(heap, &top);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(top, 24);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 22);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 20);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 19);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 18);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 17);
+        ck_assert_int_eq(heap_size(heap), --i);
+
+        ret = heap_extract(heap, &top);
+        ck_assert_int_eq(ret, 0);
+        ck_assert_int_eq(top, 15);
         ck_assert_int_eq(heap_size(heap), --i);
         
         ret = heap_destroy(heap);
@@ -1088,6 +1118,57 @@ START_TEST (test_qksort)
 }
 END_TEST
 
+START_TEST (test_mgsort)
+{
+        int data[] = {23, 21, 76, 16, 52, 43};
+        int ret;
+
+        ret = mgsort(data, ARRAY_SIZE(data), sizeof(data[0]), sort_compare);
+        ck_assert_int_eq(ret, 0);
+
+        ck_assert_int_eq(data[0], 16);
+        ck_assert_int_eq(data[1], 21);
+        ck_assert_int_eq(data[2], 23);
+        ck_assert_int_eq(data[3], 43);
+        ck_assert_int_eq(data[4], 52);
+        ck_assert_int_eq(data[5], 76);
+}
+END_TEST
+
+START_TEST (test_ctsort)
+{
+        int data[] = {23, 21, 76, 16, 52, 43};
+        int ret;
+
+        ret = ctsort(data, ARRAY_SIZE(data), 76 + 1);
+        ck_assert_int_eq(ret, 0);
+
+        ck_assert_int_eq(data[0], 16);
+        ck_assert_int_eq(data[1], 21);
+        ck_assert_int_eq(data[2], 23);
+        ck_assert_int_eq(data[3], 43);
+        ck_assert_int_eq(data[4], 52);
+        ck_assert_int_eq(data[5], 76);
+}
+END_TEST
+
+START_TEST (test_rxsort)
+{
+        int data[] = {23, 21, 76, 16, 52, 43};
+        int ret;
+
+        ret = rxsort(data, ARRAY_SIZE(data), 2, 10);
+        ck_assert_int_eq(ret, 0);
+
+        ck_assert_int_eq(data[0], 16);
+        ck_assert_int_eq(data[1], 21);
+        ck_assert_int_eq(data[2], 23);
+        ck_assert_int_eq(data[3], 43);
+        ck_assert_int_eq(data[4], 52);
+        ck_assert_int_eq(data[5], 76);
+}
+END_TEST
+
 Suite *ds_suite(void)
 {
         Suite *s;
@@ -1095,7 +1176,7 @@ Suite *ds_suite(void)
 
         s = suite_create("Data Structure Suite");
 
-        tc_core = tcase_create("Core");
+        tc_core = tcase_create("Data Structure Core");
 
         tcase_add_test(tc_core, test_list);
         tcase_add_test(tc_core, test_dlist_1);
@@ -1103,7 +1184,6 @@ Suite *ds_suite(void)
         tcase_add_test(tc_core, test_clist);
         tcase_add_test(tc_core, test_stack);
         tcase_add_test(tc_core, test_queue);
-        tcase_add_test(tc_core, test_heap);
 
         tcase_add_test(tc_core, test_set);
         tcase_add_test(tc_core, test_set_union);
@@ -1129,10 +1209,13 @@ Suite * al_suite(void)
 
         s = suite_create("Algorithm Suite");
 
-        tc_core = tcase_create("Core");
+        tc_core = tcase_create("Algorithm Core");
 
         tcase_add_test(tc_core, test_issort);
         tcase_add_test(tc_core, test_qksort);
+        tcase_add_test(tc_core, test_mgsort);
+        tcase_add_test(tc_core, test_ctsort);
+        tcase_add_test(tc_core, test_rxsort);
         
         suite_add_tcase(s, tc_core);
 
