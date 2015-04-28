@@ -16,5 +16,6 @@
 #include "pqueue.h"
 
 #include "sort.h"
+#include "search.h"
 
 #endif /* TLIB_*/

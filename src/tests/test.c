@@ -1169,6 +1169,33 @@ START_TEST (test_rxsort)
 }
 END_TEST
 
+START_TEST (test_bisearch)
+{
+        int data[] = {10, 14, 21, 38, 45, 47, 53, 81, 87, 99};
+        int target, ret;
+
+        target = 47;
+        ret = bisearch(data, &target, ARRAY_SIZE(data), sizeof(int), sort_compare);
+        ck_assert_int_eq(ret, 5);
+
+        target = 10;
+        ret = bisearch(data, &target, ARRAY_SIZE(data), sizeof(int), sort_compare);
+        ck_assert_int_eq(ret, 0);
+
+        target = 99;
+        ret = bisearch(data, &target, ARRAY_SIZE(data), sizeof(int), sort_compare);
+        ck_assert_int_eq(ret, 9);
+
+        target = 22;
+        ret = bisearch(data, &target, ARRAY_SIZE(data), sizeof(int), sort_compare);
+        ck_assert_int_eq(ret, -1);
+
+        target = 88;
+        ret = bisearch(data, &target, ARRAY_SIZE(data), sizeof(int), sort_compare);
+        ck_assert_int_eq(ret, -1);
+}
+END_TEST
+
 Suite *ds_suite(void)
 {
         Suite *s;
@@ -1216,6 +1243,8 @@ Suite * al_suite(void)
         tcase_add_test(tc_core, test_mgsort);
         tcase_add_test(tc_core, test_ctsort);
         tcase_add_test(tc_core, test_rxsort);
+
+        tcase_add_test(tc_core, test_bisearch);
         
         suite_add_tcase(s, tc_core);
 
