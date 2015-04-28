@@ -141,7 +141,7 @@ static int merge(void *data, int esize, int i, int j, int k, fp_compare compare)
                                 mpos++;
                         }
                 } else {
-                        if (compare(&a[ipos * esize], &a[jpos * esize]) < 0) {
+                        if (compare(&a[ipos * esize], &a[jpos * esize]) <= 0) {
                                 memcpy(&merged[mpos * esize], &a[ipos * esize], esize);
                                 ipos++;
                                 mpos++;
