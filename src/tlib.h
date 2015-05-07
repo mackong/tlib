@@ -18,4 +18,6 @@
 #include "sort.h"
 #include "search.h"
 
+#include "permutation.h"
+
 #endif /* TLIB_*/
