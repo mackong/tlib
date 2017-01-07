@@ -2,6 +2,9 @@ language: c
 compiler: 
     - gcc
 sudo: required
+
+env: LD_LIBRARY_PATH=~/tlib/src
+
 before_install:
     - sudo apt-get install check
 script: make && make run
